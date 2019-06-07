@@ -1,0 +1,36 @@
+.des {
+	font: 700 14px/18px arial;
+	color: #444;
+	text-rendering: geometricPrecision;
+	margin: 10px 0;
+	padding-bottom: 5px;
+}
+
+.random-news {
+	color: #9F224E;
+}
+
+.random-news-title {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+	overflow: hidden;
+	text-decoration: none;
+	color: #000;
+}
+
+.random-news-title:hover {
+	text-decoration: none;
+	color: #004f8b;
+}
+
+.content span {
+	font-size: 9pt;
+}
+
+.random-news-line {
+	background-color: #c7d2d6;
+	width: 100%;
+	height: 1px;
+}
