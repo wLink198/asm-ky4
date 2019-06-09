@@ -1,103 +1,195 @@
+Vue.component('paginate', VuejsPaginate)
+
 const Home  = {
 	data: function() {
-	     return  {
-	       message: 'Top Shit News'
-	     }
+		 return  {
+			message: 'Top Shit News',
+			allNews: [],
+			listNews: [],
+			hotNews: [],
+			pageCount: 0,
+			pageNum: 1,
+			perPage: 10,
+			lnStyle: false,
+			opDisplay: false,
+			iScroll: false,
+		 }
     },
-    mounted: function() {
-    	var r = confirm("Press a button!");
-		if (r == true) {
-		  readTextFile("test.txt");
-		} else {
-		  alert("You pressed Cancel!");
-		}
-    	function readTextFile(file)
-		{
-		    var rawFile = new XMLHttpRequest();
-		    rawFile.open("GET", file, false);
-		    rawFile.onreadystatechange = function ()
-		    {
-		        if(rawFile.readyState === 4)
-		        {
-		            if(rawFile.status === 200 || rawFile.status == 0)
-		            {
-		                var allText = rawFile.responseText;
-		                consoloe.log(allText)
-		            }
-		        }
+    methods: {
+	    clickCallback: function(pageNum) {
+	      this.pageNum = pageNum;
+	    },
+	    scrollChange: function() {
+	      this.iScroll = !this.iScroll;
+	      setTimeout(function(){ location.reload(); }, 300);
+	    },
+	    loadData() {      	
+		    window.onscroll = () => {
+		    	if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+				    document.getElementById("myBtn").style.display = "block";
+				  } else {
+				    document.getElementById("myBtn").style.display = "none";
+				  }
+		      let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight + 600 >= document.documentElement.offsetHeight;
+		      if (bottomOfWindow) {
+		        this.pageNum++;
+		      }
 		    }
-		    rawFile.send(null);
-		}	
+		}
+	},
+    watch: {
+	    lnStyle: function() {
+	    	localStorage.setItem("lnStyle", this.lnStyle);
+	    },
+	    opDisplay: function() {
+	    	localStorage.setItem("opDisplay", this.opDisplay);
+	    },
+	    iScroll: function() {
+	    	localStorage.setItem("iScroll", this.iScroll);
+	    },
+	    pageNum: function() {
+	    	if (this.iScroll==false) {
+	    		this.listNews = [];
+	    	}
+	    	for (i=(this.pageNum-1)*this.perPage; i<this.pageNum*this.perPage; i++) {
+	    		if (this.allNews.length == i) {	    			
+	    			break;
+	    		}
+				this.listNews.push(this.allNews[i]);
+  			}
+	    }
+	},
+    created: function () {
+    	document.getElementsByClassName("loader-wrap")[0].style.display = "block";
+  		document.getElementsByClassName("loader")[0].style.display = "block";
+		this.lnStyle = localStorage.getItem("lnStyle");
+	    this.lnStyle = (this.lnStyle == 'true');
+	    this.opDisplay = localStorage.getItem("opDisplay");
+	    this.opDisplay = (this.opDisplay == 'true');
+	    this.iScroll = localStorage.getItem("iScroll");
+	    this.iScroll = (this.iScroll == 'true');
+	},
+    mounted: function() {
+   		axios
+	      .get('https://1-dot-crawl-article96.appspot.com/posts')
+	      .then(response => {
+	      		this.allNews = response.data;
+	      		this.hotNews = this.allNews.pop();
+      			for (i=(this.pageNum-1)*this.perPage; i<this.pageNum*this.perPage; i++) {
+  					this.listNews.push(this.allNews[i])
+      			}		      	
+		      	this.pageCount = Math.ceil((this.allNews.length)/this.perPage);
+		      	if (this.iScroll==true) {
+	      			this.loadData();
+		      	}		      	
+	      	}).finally(function() {
+	      		document.getElementsByClassName("loader-wrap")[0].style.display = "none";
+	      		document.getElementsByClassName("loader")[0].style.display = "none";
+	      	})
     },
   template: `<div id="homeController" class="container content">
+  	<div id="customize" class="customize" v-bind:class="opDisplay==true ? 'hide-customize' : '' ">
+        <h6 class="mb-4">Select an option</h6>
+        <button v-on:click="lnStyle=!lnStyle">News display style 
+        	<span v-if="lnStyle==true" style="background: #42c2f4">ON</span>
+        	<span v-else>Off</span>
+        </button>
+        <button v-on:click="scrollChange">Infinity scroll
+        	<span v-if="iScroll==true" style="background: #42c2f4">ON</span>
+        	<span v-else>Off</span>
+        </button>
+        <button v-on:click="opDisplay=!opDisplay">Hide options
+        	<span v-if="opDisplay==true" style="background: #42c2f4">ON</span>
+        	<span v-else>Off</span>
+        </button>
+    </div>
 	<h3 class="hot-new-title"> {{message}} </h3>
 	<div class="row">
 		<div class="col-md-5 hot-news-wrapper">
-			<img class="hot-news" src="test.jpg" alt="">
+			<router-link :to="{ name: 'post', params: { post: hotNews.link }}"><img class="hot-news" :src="hotNews.image" alt="error cmnr"></router-link>
 		</div>
 		<div class="col-md-7 hot-news-inshort">
-			<h3 class="mt-4 mb-3" style="font-size: 30px">News Title</h3>
-			<span style="font-weight: 600">Author-Date-Blabla</span>
-			<p class="mt-5">Porn makes up most of the Internet. It's everywhere. Trying Googling anything with Safe Search off and you won't make it very far without stumbling upon a whole world of porn. Naturally some people were ahead of the curve and build an empire around this porn. These men, chuck full of ingenuity and testosterone, created Pornhub.
-
-But there's much much more to the site than meets the eye. Did you know that Pornhub funds cancer research? Or that they plan to send porn stars to space? Or that the founder sold the company in 2010 and it's now part of the largest porn empire in existence? How about that women make up 24% of the traffic on average? Or that viewership falls on nearly every major holiday? 
-
-There's so much to learn about the Pornhub company and the insights into the human psyche they've uncovered by tracking our traffic over the years. These are the things you didn't know about Pornhub.</p>
+			<router-link style="color: #000" :to="{ name: 'post', params: { post: hotNews.link }}">
+				<h3 class="mt-2 mb-2" style="font-size: 30px">{{hotNews.title}}</h3>
+				<span style="font-weight: 600">{{hotNews.author}}</span>
+				<p class="mt-3">{{hotNews.description}}</p>
+			</router-link
 		</div>
 	</div>
 	<div class="more-new-title-wrap"><h5 class="more-new-title">Some more shit news</h5></div>
 	<div class="list-news">
-		<div class="row mb-5">
-			<div class="col-md-3">
-				<img src="https://demo.tagdiv.com/newspaper/wp-content/uploads/2015/04/snowboard-218x150.jpg" alt="">
+		<div v-for="item in listNews" style="transition: all 0.5s" class="ln-row mb-5"
+		 v-bind:class="lnStyle==true ? 'ln-row-type2' : 'row' " v-bind:style="lnStyle==true ? 'padding-left: 30px' : '' ">
+			<div class="col-md-4">
+				<router-link :to="{ name: 'post', params: { post: item.link }}"><img :src="item.image" alt="error cmnr"></router-link>
 			</div>
 			<div class="col-md-8">
-				<h4>Title</h4>
-				<span style="font-weight: 700; font-size: 12px">Author-Date-Blabla</span>
-				<p class="mt-3">Calvin Klein known for launching the careers of such svelte models as Brooke Shields and Kate Moss to cast a model who deviates from the...</p>
+				<router-link style="color: #000" :to="{ name: 'post', params: { post: item.link }}">
+					<h5 class="mt-3">{{item.title}}</h5>
+					<span style="font-weight: 700; font-size: 12px">{{item.author}}</span>
+					<p class="mt-3">{{item.description}}</p>
+				</router-link>
 			</div>
 		</div>
 	</div>
-	<div class="row mb-5">
-		<div class="col-md-3">
-			<img src="https://demo.tagdiv.com/newspaper/wp-content/uploads/2015/04/snowboard-218x150.jpg" alt="">
-		</div>
-		<div class="col-md-8">
-			<h4>Title</h4>
-			<span style="font-weight: 700; font-size: 12px">Author-Date-Blabla</span>
-			<p class="mt-3">Calvin Klein known for launching the careers of such svelte models as Brooke Shields and Kate Moss to cast a model who deviates from the...</p>
-		</div>
+	<div style="clear: both"></div>
+	<div v-if="iScroll==false" class="col-md-11">
+		<template>
+		  <paginate
+		  	:click-handler="clickCallback"
+		    :page-count="pageCount"
+		    :page-range="3"
+		    :margin-pages="2"	    
+		    :prev-text="'Prev'"
+		    :next-text="'Next'"
+		    :container-class="'pagination'"
+		    :prev-class="'page-item'"
+		    :next-class="'page-item'"
+		    :page-class="'page-item'"
+		    :prev-link-class="'page-link'"
+		    :next-link-class="'page-link'"
+		    :page-link-class="'page-link'">
+		  </paginate>
+		</template>	
 	</div>
-	<div class="row mb-5">
-		<div class="col-md-3">
-			<img src="https://demo.tagdiv.com/newspaper/wp-content/uploads/2015/04/snowboard-218x150.jpg" alt="">
-		</div>
-		<div class="col-md-8">
-			<h4>Title</h4>
-			<span style="font-weight: 700; font-size: 12px">Author-Date-Blabla</span>
-			<p class="mt-3">Calvin Klein known for launching the careers of such svelte models as Brooke Shields and Kate Moss to cast a model who deviates from the...</p>
-		</div>
-	</div>	
+</div>
 </div>`,
 }
 
 const News = {
-  template: `<div class="container mt-3">
+	data: function() {
+		 return  {
+			news: [],
+		 }
+    },
+    created: function () {
+    	document.getElementsByClassName("loader-wrap")[0].style.display = "block";
+  		document.getElementsByClassName("loader")[0].style.display = "block";
+  	},
+	mounted: function() {
+		document.body.scrollTop = 0;
+		document.documentElement.scrollTop = 0;
+   		axios
+	      .get('https://1-dot-crawl-article96.appspot.com/posts/detail?p=' + this.$route.params.post)
+	      .then(response => {
+	      		this.news = response.data;
+	      	}).finally(function() {
+	      		document.getElementsByClassName("loader-wrap")[0].style.display = "none";
+	      		document.getElementsByClassName("loader")[0].style.display = "none";
+	      	})
+    },
+  template: `<div class="container mt-5">
 		<div class="row">
 			<div class="col-sm-12 col-md-8">
-				<h1>WordPress News Magazine Charts the Most Fashionable New York Women</h1>
-				<p>By <strong>Thong</strong> - <span>17/1/1112</span></p>
+				<h1>{{news.title}}</h1>
+				<p>By <strong>{{news.author}}</strong></p>
 			</div>
 		</div>
 
 		<div class="row mt-3">
 			<div class="col-sm-12 col-md-8">
-				<div class="des mb-3">Bộ Ngoại giao cho rằng Thủ tướng Lý Hiển Long không phản ánh khách quan lịch sử khi phát biểu Việt Nam "xâm lược" Campuchia.</div>
-				<p>Trong bài viết trên Facebook hôm 31/5 nhằm chia buồn việc cựu thủ tướng Thái Lan Prem Tinsulanonda qua đời, Thủ tướng Singapore Lý Hiển Long có những phát biểu đề cập tới mối quan hệ giữa Việt Nam với Campuchia và ASEAN trong thập niên 1980.</p>
-				<p>Trong bài viết trên Facebook hôm 31/5 nhằm chia buồn việc cựu thủ tướng Thái Lan Prem Tinsulanonda qua đời, Thủ tướng Singapore Lý Hiển Long có những phát biểu đề cập tới mối quan hệ giữa Việt Nam với Campuchia và ASEAN trong thập niên 1980.</p>
-				<p>Trong bài viết trên Facebook hôm 31/5 nhằm chia buồn việc cựu thủ tướng Thái Lan Prem Tinsulanonda qua đời, Thủ tướng Singapore Lý Hiển Long có những phát biểu đề cập tới mối quan hệ giữa Việt Nam với Campuchia và ASEAN trong thập niên 1980.</p>
-				<p>Trong bài viết trên Facebook hôm 31/5 nhằm chia buồn việc cựu thủ tướng Thái Lan Prem Tinsulanonda qua đời, Thủ tướng Singapore Lý Hiển Long có những phát biểu đề cập tới mối quan hệ giữa Việt Nam với Campuchia và ASEAN trong thập niên 1980.</p>
-				<p>Trong bài viết trên Facebook hôm 31/5 nhằm chia buồn việc cựu thủ tướng Thái Lan Prem Tinsulanonda qua đời, Thủ tướng Singapore Lý Hiển Long có những phát biểu đề cập tới mối quan hệ giữa Việt Nam với Campuchia và ASEAN trong thập niên 1980.</p>
+				<div class="des mb-3">{{news.description}}</div>
+				<div v-html="news.content"> </div>
 			</div>
 			<div class="col-sm-12 col-md-4">
 				<h4 class="random-news">Random News</h4>
@@ -137,22 +229,69 @@ const News = {
 					</div>
 				</div>
 			</div>
-
 		</div>
 	</div>`
 }
 
-const Create {
+const Create = {
+	data: function() {
+		 return  {
+		   showDm: false
+		 }
+    },
+	mounted: function() {
+		document.getElementsByClassName("loader-wrap")[0].style.display = "none";
+  		document.getElementsByClassName("loader")[0].style.display = "none";
+	},
 	template: `
-	
-	`
+	<div>
+		<div class="news-form mt-5">
+			<h5 class="ml-1 mb-4">Feel free to contribute! Please be respectful.</h5>
+			<h3 class="ml-1">Add News Link</h3>
+			<div class="row mt-4">
+				<div class="col-md-10 news-input-wrapper news-input-url">
+					<input class="news-input" type="text" placeholder="Enter url">
+				</div>
+			</div>
+			<div class="row mt-4">
+				<div class="col-md-10 news-input-wrapper news-input-title">
+					<input class="news-input" type="text" placeholder="Title selecter">
+				</div>
+			</div>
+			<div class="row mt-4">
+				<div class="col-md-10 news-input-wrapper news-input-content">
+					<input class="news-input" type="text" placeholder="Content selector">
+				</div>
+			</div>
+			<div class="row mt-4">
+				<div class="col-md-10 news-input-wrapper news-input-remove">
+					<input class="news-input" type="text" placeholder="Exception selector">
+				</div>
+			</div>
+			<div class="col-md-10"><button v-on:click="showDm=!showDm" class="mt-4 live-demo">Live Demo</button></div>
+		</div>
+
+		<transition name="fade" mode="out-in">
+			<div class="container" v-if="showDm">		
+				<div class="live-demo-area mt-4">
+					<p>ggwp</p>
+					<p>ggwp</p>
+					<p>ggwp</p>
+					<p>ggwp</p>
+					<p>ggwp</p>
+				</div>
+				<div class="col-md-5" style="margin-left:25.6%;"><button class="mt-4 live-demo">Save</button></div>
+			</div>
+		</transition>
+	</div>`
 }
 
 const router = new VueRouter({
-  routes: [
-    { path: '/', component: Home },
-    { path: '/news', component: News },
-  ]
+	routes: [
+		{ path: '/', component: Home },
+		{ path: '/news', component: Create },
+		{ path: '/post/:post', component: News, name: 'post' },
+	]
 })
 
 new Vue({

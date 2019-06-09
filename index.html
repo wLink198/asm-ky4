@@ -4,10 +4,13 @@
 	<meta charset="UTF-8">
 	<title>Document</title>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+	<link href="font/css/font-awesome.min.css" rel="stylesheet">
 	<link rel="stylesheet" href="style.css">
 	<link rel="stylesheet" href="style2.css">
 	<script src="https://unpkg.com/vue/dist/vue.js"></script>
 	<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+	<script src="https://unpkg.com/vuejs-paginate@latest"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
 <body>
 	<div id="app">
@@ -20,17 +23,13 @@
 				</ul>
 			</div>
 		</div>
-
-		<div class="news-form container">
-			<div class="row">
-				<div class="col-md-3">Url</div>
-			</div>
-		</div>
+		<div class="loader-wrap"><div class="loader"></div></div>
 	
-		<!-- <transition name="fade" mode="out-in">
+		<transition name="fade" mode="out-in">
 		<router-view></router-view>
-		</transition> -->
+		</transition>
 
+		<button onclick="topFunction()" id="myBtn" title="Go to top"></button>
 		<div class="footer">
 			<div class="footer-wrapper"></div>
 			<div class="container">
@@ -66,4 +65,19 @@
 	</div>
 </body>
 <script src="main.js"></script>
+<script>
+window.onscroll = () => {scrollFunction()};
+
+function scrollFunction() {
+  if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+    document.getElementById("myBtn").style.display = "block";
+  } else {
+    document.getElementById("myBtn").style.display = "none";
+  }
+}
+function topFunction() {
+	document.body.scrollTop = 0; // For Safari
+	document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+}
+</script>
 </html>
