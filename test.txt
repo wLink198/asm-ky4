@@ -1,4 +1,0 @@
-{
-	"user": "ggwp",
-	"pass": "lol"
-}

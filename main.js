@@ -70,10 +70,14 @@ const Home  = {
 	    this.iScroll = (this.iScroll == 'true');
 	},
     mounted: function() {
+    	document.body.scrollTop = 0;
+		document.documentElement.scrollTop = 0;
    		axios
 	      .get('https://1-dot-crawl-article96.appspot.com/posts')
 	      .then(response => {
 	      		this.allNews = response.data;
+	      		localStorage.setItem("allNews", JSON.stringify(this.allNews));
+
 	      		this.hotNews = this.allNews.pop();
       			for (i=(this.pageNum-1)*this.perPage; i<this.pageNum*this.perPage; i++) {
   					this.listNews.push(this.allNews[i])
@@ -160,15 +164,45 @@ const News = {
 	data: function() {
 		 return  {
 			news: [],
+			allNews: [],
+			iNews: [],
+			randomNews: [],
+			irray: [],
+			icount: 3,
 		 }
     },
+    methods: {
+	    rNews() {
+	    	if (localStorage.getItem("icount")) {
+	    		this.icount = localStorage.getItem("icount");
+	    	}
+	        const pickRandom = (arr,count) => {
+			  let _arr = [...arr];
+			  return[...Array(count)].map( ()=> arr.splice(Math.floor(Math.random() * arr.length), 1)[0] ); 
+			}
+			this.allNews = JSON.parse(localStorage.getItem("allNews"));
+			for(let i=0; i<this.allNews.length; i++) { this.iNews.push(i) }
+			this.irray = pickRandom(this.iNews, parseInt(this.icount));
+			this.irray.forEach(e => {
+				this.randomNews.push(this.allNews[e])
+			})
+	    },
+	    icountF() {
+	    	document.getElementById("icountInput").disabled = true;
+	    	if (this.icount < 1) { this.icount=1 }
+    		if (this.icount > 9) { this.icount=9 }
+	    	localStorage.setItem("icount", this.icount);
+    		setTimeout(function(){ location.reload(); }, 300);
+	    }
+	},
     created: function () {
     	document.getElementsByClassName("loader-wrap")[0].style.display = "block";
   		document.getElementsByClassName("loader")[0].style.display = "block";
   	},
-	mounted: function() {
+	mounted: function() {	
 		document.body.scrollTop = 0;
 		document.documentElement.scrollTop = 0;
+		this.rNews();
    		axios
 	      .get('https://1-dot-crawl-article96.appspot.com/posts/detail?p=' + this.$route.params.post)
 	      .then(response => {
@@ -192,40 +226,26 @@ const News = {
 				<div v-html="news.content"> </div>
 			</div>
 			<div class="col-sm-12 col-md-4">
-				<h4 class="random-news">Random News</h4>
+				<h4 class="random-news">Not So Related News</h4>
 				<div class="mb-4 random-news-line"></div>
 
-				<div class="row mb-3">
-					<div class="col-4">
-						<a href="">
-							<img src="https://i.kym-cdn.com/entries/icons/original/000/000/091/TrollFace.jpg" width="100%">
-						</a>
+				<transition-group name="list" tag="div">
+					<div v-for="item in randomNews" v-bind:key="item" class="row mb-3">
+						<div class="col-4">
+							<a href="">
+								<img :src="item.image" width="100%">
+							</a>
+						</div>
+						<div class="col-8 content">
+							<a class="random-news-title" href="#">{{item.title}}</a>
+							<p>By <strong>{{item.author}}</strong></p>
+						</div>
 					</div>
-					<div class="col-8 content">
-						<a class="random-news-title" href="#">Lý Hiển Long có những phát 5 nhằm chia buồn việ 5 nhằm chia buồn việ</a>
-						<span>12/21/2222</span>
-					</div>
-				</div>
-				<div class="row mb-3">
-					<div class="col-4">
-						<a href="">
-							<img src="https://i.kym-cdn.com/entries/icons/original/000/000/091/TrollFace.jpg" width="100%">
-						</a>
-					</div>
-					<div class="col-8 content">
-						<a class="random-news-title" href="#">Lý Hiển Long có những phát 5 nhằm chia buồn việ 5 nhằm chia buồn việ</a>
-						<span>12/21/2222</span>
-					</div>
-				</div>
-				<div class="row mb-3">
-					<div class="col-4">
-						<a href="">
-							<img src="https://i.kym-cdn.com/entries/icons/original/000/000/091/TrollFace.jpg" width="100%">
-						</a>
-					</div>
-					<div class="col-8 content">
-						<a class="random-news-title" href="#">Lý Hiển Long có những phát 5 nhằm chia buồn việ 5 nhằm chia buồn việ</a>
-						<span>12/21/2222</span>
+				</transition-group>
+				<div class="row">
+					<div class="col-md-8 pt-2" style="font: 700 14px/18px arial; font-size:15px">Enter number of News ( < 10 ): </div>
+					<div class="col-md-4">
+						<input id="icountInput" type="number" class="form-control" placeholder="Enter a number" v-model="icount" v-on:change="icountF">
 					</div>
 				</div>
 			</div>
@@ -235,9 +255,79 @@ const News = {
 
 const Create = {
 	data: function() {
-		 return  {
-		   showDm: false
-		 }
+		return  {
+			showDm: false,
+			dmmInput: {},
+			dmInput: {},
+			urlInput: 'http://kenh14.vn/cong-bo-cuoi-vo-chua-lau-cris-phan-bong-bi-nguoi-yeu-cu-la-gai-xinh-co-tieng-cong-khai-dan-mat-bang-tro-nhac-lai-ki-niem-xua-20190610091747593.chn',
+			blockInput: '',
+			imageInput: '',
+			desInput: '.knc-content',
+			titleInput: '.kbwc-title',
+			contentInput: '',
+			authorInput: '',
+			linkInput: '',
+			config: {
+				headers: {
+					'X-Requested-With': 'XMLHttpRequest'
+				}
+			}
+		}
+    },
+    watch: {
+    	urlInput: function() {
+    		this.dmInput['url'] = this.urlInput;   
+    		this.dmmInput['url'] = this.urlInput;		    		
+    	},
+    	blockInput: function() {
+    		this.dmInput['block'] = this.blockInput;
+    	},
+    	imageInput: function() {
+    		this.dmInput['image'] = this.imageInput;
+    	},
+    	desInput: function() {
+    		this.dmInput['des'] = this.desInput;
+    		this.dmmInput['des'] = this.desInput;
+    	},
+    	titleInput: function() {
+    		this.dmInput['title'] = this.titleInput;
+    		this.dmmInput['title'] = this.titleInput;
+    	},
+    	contentInput: function() {
+    		this.dmInput['content'] = this.contentInput;
+    	},
+    	authorInput: function() {
+    		this.dmInput['author'] = this.authorInput;
+    	},
+    	linkInput: function() {
+    		this.dmInput['link'] = this.linkInput;
+    	}
+    },
+    methods: {
+    	showDmm: function() {
+    		this.showDm = !this.showDm;
+    		if (this.showDm==true) {
+    			document.getElementsByClassName("loader-wrap")[0].style.display = "block";
+  				document.getElementsByClassName("loader")[0].style.display = "block";
+    			axios
+				.post('https://1-dot-crawl-article96.appspot.com/posts', this.dmmInput, {'Content-Type': 'application/json'})
+				.then(response => {
+					console.log(response.data);
+				}).finally(function() {
+					document.getElementsByClassName("loader-wrap")[0].style.display = "none";
+  					document.getElementsByClassName("loader")[0].style.display = "none";
+				})
+    		}
+    	},
+    	submitDm: function() {
+    // 		if (this.showDm==true) {
+    // 			axios
+				// .post('https://20190610t095445-dot-api-job-233606.appspot.com/_cron/crawler', this.dmmInput)
+				// .then(response => {
+				// 	console.log(response.data);
+				// })
+    // 		}
+    	}
     },
 	mounted: function() {
 		document.getElementsByClassName("loader-wrap")[0].style.display = "none";
@@ -248,39 +338,63 @@ const Create = {
 		<div class="news-form mt-5">
 			<h5 class="ml-1 mb-4">Feel free to contribute! Please be respectful.</h5>
 			<h3 class="ml-1">Add News Link</h3>
-			<div class="row mt-4">
-				<div class="col-md-10 news-input-wrapper news-input-url">
-					<input class="news-input" type="text" placeholder="Enter url">
+				<div class="row">
+					<div class="row mt-4 col-md-6">
+						<div class="col-md-12 news-input-wrapper news-input-url">
+							<input v-model="urlInput" class="news-input" type="text" placeholder="Url selector">
+						</div>
+					</div>
+					<div class="row mt-4 col-md-6">
+						<div class="col-md-12 news-input-wrapper news-input-block">
+							<input v-model="blockInput" class="news-input" type="text" placeholder="Block selector">
+						</div>
+					</div>
 				</div>
-			</div>
-			<div class="row mt-4">
-				<div class="col-md-10 news-input-wrapper news-input-title">
-					<input class="news-input" type="text" placeholder="Title selecter">
+				<div class="row">
+					<div class="row mt-4 col-md-6">
+						<div class="col-md-12 news-input-wrapper news-input-image">
+							<input v-model="imageInput" class="news-input" type="text" placeholder="Image selector">
+						</div>
+					</div>
+					<div class="row mt-4 col-md-6">
+						<div class="col-md-12 news-input-wrapper news-input-des">
+							<input v-model="desInput" class="news-input" type="text" placeholder="Description selector">
+						</div>
+					</div>
 				</div>
-			</div>
-			<div class="row mt-4">
-				<div class="col-md-10 news-input-wrapper news-input-content">
-					<input class="news-input" type="text" placeholder="Content selector">
+				<div class="row">
+					<div class="row mt-4 col-md-6">
+						<div class="col-md-12 news-input-wrapper news-input-title">
+							<input v-model="titleInput" class="news-input" type="text" placeholder="Title selector">
+						</div>
+					</div>
+					<div class="row mt-4 col-md-6">
+						<div class="col-md-12 news-input-wrapper news-input-content">
+							<input v-model="contentInput" class="news-input" type="text" placeholder="Content selector">
+						</div>
+					</div>
 				</div>
-			</div>
-			<div class="row mt-4">
-				<div class="col-md-10 news-input-wrapper news-input-remove">
-					<input class="news-input" type="text" placeholder="Exception selector">
+				<div class="row">
+					<div class="row mt-4 col-md-6">
+						<div class="col-md-12 news-input-wrapper news-input-author">
+							<input v-model="authorInput" class="news-input" type="text" placeholder="Author selector">
+						</div>
+					</div>
+					<div class="row mt-4 col-md-6">
+						<div class="col-md-12 news-input-wrapper news-input-link">
+							<input v-model="linkInput" class="news-input" type="text" placeholder="Link selector">
+						</div>
+					</div>
 				</div>
-			</div>
-			<div class="col-md-10"><button v-on:click="showDm=!showDm" class="mt-4 live-demo">Live Demo</button></div>
+			<div class="col-md-10"><button v-on:click="showDmm" class="mt-4 live-demo">Live Demo</button></div>
 		</div>
 
 		<transition name="fade" mode="out-in">
 			<div class="container" v-if="showDm">		
 				<div class="live-demo-area mt-4">
-					<p>ggwp</p>
-					<p>ggwp</p>
-					<p>ggwp</p>
-					<p>ggwp</p>
-					<p>ggwp</p>
+					<pre>{{dmInput}}</pre>
 				</div>
-				<div class="col-md-5" style="margin-left:25.6%;"><button class="mt-4 live-demo">Save</button></div>
+				<div class="col-md-5" style="margin-left:25.6%;"><button v-on:click="submitDm" class="mt-4 live-demo">Save</button></div>
 			</div>
 		</transition>
 	</div>`
