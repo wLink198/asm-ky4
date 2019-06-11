@@ -306,7 +306,7 @@ const Create = {
     },
     methods: {
     	showDmm: function() {
-    		this.showDm = !this.showDm;
+    		this.showDm = true;
     		if (this.showDm==true) {
     			document.getElementsByClassName("loader-wrap")[0].style.display = "block";
   				document.getElementsByClassName("loader")[0].style.display = "block";
@@ -398,7 +398,7 @@ const Create = {
 			<div class="container" v-if="showDm">		
 				<div id="live-demo-area" class="live-demo-area mt-4">
 					<h3 class="mb-5">{{dmData.title}}</h3>
-					<div v-html="dmData.content"></div>
+					<div class="live-demo-content" v-html="dmData.content"></div>
 				</div>
 				<div class="col-md-5" style="margin-left:25.6%;"><button v-on:click="submitDm" class="mt-4 live-demo">Save</button></div>
 			</div>

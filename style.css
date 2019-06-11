@@ -217,10 +217,15 @@ li {
 	justify-content: center;
 }
 .live-demo-area {
+	width: 70%;
+	margin: auto;
 	box-shadow: inset 0px 0px 5px 2px rgba(0,0,0,0.2);
 	border-radius: 5px;
-	padding: 30px;
+	padding: 30px 50px;
 	transition: all 0.5s;
+}
+.live-demo-content {
+	padding: 0 30px;
 }
 .pagination {
     margin: auto;
