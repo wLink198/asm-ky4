@@ -269,7 +269,7 @@ const Create = {
 			linkInput: '',
 			config: {
 				headers: {
-					'X-Requested-With': 'XMLHttpRequest'
+					'Content-Type': 'application/json'
 				}
 			}
 		}
@@ -332,6 +332,9 @@ const Create = {
 	mounted: function() {
 		document.getElementsByClassName("loader-wrap")[0].style.display = "none";
   		document.getElementsByClassName("loader")[0].style.display = "none";
+  		this.dmmInput['url'] = this.urlInput;
+  		this.dmmInput['des'] = this.desInput;
+  		this.dmmInput['title'] = this.titleInput;
 	},
 	template: `
 	<div>
@@ -392,7 +395,7 @@ const Create = {
 		<transition name="fade" mode="out-in">
 			<div class="container" v-if="showDm">		
 				<div class="live-demo-area mt-4">
-					<pre>{{dmInput}}</pre>
+					<pre>{{dmmInput}}</pre>
 				</div>
 				<div class="col-md-5" style="margin-left:25.6%;"><button v-on:click="submitDm" class="mt-4 live-demo">Save</button></div>
 			</div>
