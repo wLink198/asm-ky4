@@ -257,6 +257,7 @@ const Create = {
 	data: function() {
 		return  {
 			showDm: false,
+			dmData: {},
 			dmmInput: {},
 			dmInput: {},
 			urlInput: 'http://kenh14.vn/cong-bo-cuoi-vo-chua-lau-cris-phan-bong-bi-nguoi-yeu-cu-la-gai-xinh-co-tieng-cong-khai-dan-mat-bang-tro-nhac-lai-ki-niem-xua-20190610091747593.chn',
@@ -269,7 +270,7 @@ const Create = {
 			linkInput: '',
 			config: {
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				}
 			}
 		}
@@ -286,8 +287,8 @@ const Create = {
     		this.dmInput['image'] = this.imageInput;
     	},
     	desInput: function() {
-    		this.dmInput['des'] = this.desInput;
-    		this.dmmInput['des'] = this.desInput;
+    		this.dmInput['description'] = this.desInput;
+    		this.dmmInput['description'] = this.desInput;
     	},
     	titleInput: function() {
     		this.dmInput['title'] = this.titleInput;
@@ -310,10 +311,11 @@ const Create = {
     			document.getElementsByClassName("loader-wrap")[0].style.display = "block";
   				document.getElementsByClassName("loader")[0].style.display = "block";
     			axios
-				.post('https://1-dot-crawl-article96.appspot.com/posts', this.dmmInput, {withCredentials: true})
+				.post('https://1-dot-crawl-article96.appspot.com/posts', JSON.stringify(this.dmmInput), this.config)
 				.then(response => {
-					console.log(response.data);
+					this.dmData = response.data;
 				}).finally(function() {
+					document.getElementById("live-demo-area").scrollIntoView();
 					document.getElementsByClassName("loader-wrap")[0].style.display = "none";
   					document.getElementsByClassName("loader")[0].style.display = "none";
 				})
@@ -333,7 +335,7 @@ const Create = {
 		document.getElementsByClassName("loader-wrap")[0].style.display = "none";
   		document.getElementsByClassName("loader")[0].style.display = "none";
   		this.dmmInput['url'] = this.urlInput;
-  		this.dmmInput['des'] = this.desInput;
+  		this.dmmInput['description'] = this.desInput;
   		this.dmmInput['title'] = this.titleInput;
 	},
 	template: `
@@ -394,8 +396,9 @@ const Create = {
 
 		<transition name="fade" mode="out-in">
 			<div class="container" v-if="showDm">		
-				<div class="live-demo-area mt-4">
-					<pre>{{dmmInput}}</pre>
+				<div id="live-demo-area" class="live-demo-area mt-4">
+					<h3 class="mb-5">{{dmData.title}}</h3>
+					<div v-html="dmData.content"></div>
 				</div>
 				<div class="col-md-5" style="margin-left:25.6%;"><button v-on:click="submitDm" class="mt-4 live-demo">Save</button></div>
 			</div>
