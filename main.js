@@ -310,7 +310,7 @@ const Create = {
     			document.getElementsByClassName("loader-wrap")[0].style.display = "block";
   				document.getElementsByClassName("loader")[0].style.display = "block";
     			axios
-				.post('https://1-dot-crawl-article96.appspot.com/posts', this.dmmInput, {'Content-Type': 'application/json'})
+				.post('https://1-dot-crawl-article96.appspot.com/posts', this.dmmInput, {withCredentials: true})
 				.then(response => {
 					console.log(response.data);
 				}).finally(function() {
