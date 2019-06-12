@@ -70,8 +70,6 @@ const Home  = {
 	    this.iScroll = (this.iScroll == 'true');
 	},
     mounted: function() {
-    	document.body.scrollTop = 0;
-		document.documentElement.scrollTop = 0;
    		axios
 	      .get('https://1-dot-crawl-article96.appspot.com/posts')
 	      .then(response => {
@@ -89,6 +87,8 @@ const Home  = {
 	      	}).finally(function() {
 	      		document.getElementsByClassName("loader-wrap")[0].style.display = "none";
 	      		document.getElementsByClassName("loader")[0].style.display = "none";
+	      		document.body.scrollTop = 0;
+				document.documentElement.scrollTop = 0;
 	      	})
     },
   template: `<div id="homeController" class="container content">
@@ -129,15 +129,15 @@ const Home  = {
 			</div>
 			<div class="col-md-8">
 				<router-link style="color: #000" :to="{ name: 'post', params: { post: item.link }}">
-					<h5 class="mt-3">{{item.title}}</h5>
+					<h5 class="mt-3 news-tit" v-bind:title="item.title">{{item.title}}</h5>
 					<span style="font-weight: 700; font-size: 12px">{{item.author}}</span>
-					<p class="mt-3">{{item.description}}</p>
+					<p class="mt-3 news-des">{{item.description}}</p>
 				</router-link>
 			</div>
 		</div>
 	</div>
 	<div style="clear: both"></div>
-	<div v-if="iScroll==false" class="col-md-11">
+	<div v-if="iScroll==false" class="col-md-11 mt-3">
 		<template>
 		  <paginate
 		  	:click-handler="clickCallback"

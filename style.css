@@ -270,7 +270,7 @@ li {
 .ln-row-type2 {
 	width: 50%;
 	float: left;
-	height: 420px;
+	height: 400px;
 }
 .hide-customize {
 	opacity: 0;
@@ -300,7 +300,7 @@ li {
 	content: '\f102 ';
 	position: absolute;
 	font-size: 30px;
-	top: 5px;
+	top: 2px;
 	right: 0;
 	left: 0;
 }
