@@ -260,24 +260,30 @@ const Create = {
 			dmData: {},
 			dmmInput: {},
 			dmInput: {},
-			urlInput: 'http://kenh14.vn/cong-bo-cuoi-vo-chua-lau-cris-phan-bong-bi-nguoi-yeu-cu-la-gai-xinh-co-tieng-cong-khai-dan-mat-bang-tro-nhac-lai-ki-niem-xua-20190610091747593.chn',
+			urlInput: '',
 			blockInput: '',
 			imageInput: '',
-			desInput: '.knc-content',
-			titleInput: '.kbwc-title',
+			desInput: '',
+			titleInput: '',
 			contentInput: '',
 			authorInput: '',
 			linkInput: '',
+			bodyFormData: null,
 			config: {
 				headers: {
 					'Content-Type': 'application/json',
+				}
+			},
+			configSave: {
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
 				}
 			}
 		}
     },
     watch: {
     	urlInput: function() {
-    		this.dmInput['url'] = this.urlInput;   
+    		this.dmInput['url'] = this.urlInput.split("/")[0] + "//" + this.urlInput.split("/")[2];   
     		this.dmmInput['url'] = this.urlInput;		    		
     	},
     	blockInput: function() {
@@ -322,21 +328,27 @@ const Create = {
     		}
     	},
     	submitDm: function() {
-    // 		if (this.showDm==true) {
-    // 			axios
-				// .post('https://20190610t095445-dot-api-job-233606.appspot.com/_cron/crawler', this.dmmInput)
-				// .then(response => {
-				// 	console.log(response.data);
-				// })
-    // 		}
+    		if (this.showDm==true) {
+    			this.bodyFormData = new URLSearchParams();
+		  		this.bodyFormData.append('url', this.urlInput);
+				this.bodyFormData.append('block', this.blockInput);
+				this.bodyFormData.append('content', this.contentInput);
+				this.bodyFormData.append('description', this.description);
+				this.bodyFormData.append('image', this.imageInput);
+				this.bodyFormData.append('link', this.linkInput);
+				this.bodyFormData.append('title', this.title);
+				this.bodyFormData.append('author', this.authorInput);		
+    			axios
+				.post('https://1-dot-crawl-article96.appspot.com/admin/resource', this.bodyFormData, this.configSave)
+				.then(response => {
+					alert('GGWP!');
+				})
+    		}
     	}
     },
 	mounted: function() {
 		document.getElementsByClassName("loader-wrap")[0].style.display = "none";
-  		document.getElementsByClassName("loader")[0].style.display = "none";
-  		this.dmmInput['url'] = this.urlInput;
-  		this.dmmInput['description'] = this.desInput;
-  		this.dmmInput['title'] = this.titleInput;
+  		document.getElementsByClassName("loader")[0].style.display = "none";	
 	},
 	template: `
 	<div>
