@@ -49,3 +49,8 @@
     text-overflow: ellipsis;
 	overflow: hidden;
 }
+.demo-table {
+	box-shadow: 0 4px 10px rgb(68, 71, 76, 0.1);
+	border-radius: 5px;
+	border-top: none;
+}

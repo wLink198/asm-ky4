@@ -183,6 +183,7 @@ const News = {
 			this.allNews = JSON.parse(localStorage.getItem("allNews"));
 			for(let i=0; i<this.allNews.length; i++) { this.iNews.push(i) }
 			this.irray = pickRandom(this.iNews, parseInt(this.icount));
+			this.randomNews = [];
 			this.irray.forEach(e => {
 				this.randomNews.push(this.allNews[e])
 			})
@@ -193,7 +194,29 @@ const News = {
     		if (this.icount > 9) { this.icount=9 }
 	    	localStorage.setItem("icount", this.icount);
     		setTimeout(function(){ location.reload(); }, 300);
+	    },
+	    loadData() {
+	    	document.getElementsByClassName("loader-wrap")[0].style.display = "block";
+  			document.getElementsByClassName("loader")[0].style.display = "block";
+	    	axios
+	      .get('https://1-dot-crawl-article96.appspot.com/posts/detail?p=' + this.$route.params.post)
+	      .then(response => {
+	      		this.news = [];
+	      		this.news = response.data;
+	      	}).finally(function() {
+	      		document.getElementsByClassName("loader-wrap")[0].style.display = "none";
+	      		document.getElementsByClassName("loader")[0].style.display = "none";
+	      	})
 	    }
+	},
+	watch: {
+	  "$route.params.post": {
+	    handler(post) {
+    	  this.rNews();
+	      this.loadData();
+	    },
+	    immediate: true
+	  }
 	},
     created: function () {
     	document.getElementsByClassName("loader-wrap")[0].style.display = "block";
@@ -203,14 +226,7 @@ const News = {
 		document.body.scrollTop = 0;
 		document.documentElement.scrollTop = 0;
 		this.rNews();
-   		axios
-	      .get('https://1-dot-crawl-article96.appspot.com/posts/detail?p=' + this.$route.params.post)
-	      .then(response => {
-	      		this.news = response.data;
-	      	}).finally(function() {
-	      		document.getElementsByClassName("loader-wrap")[0].style.display = "none";
-	      		document.getElementsByClassName("loader")[0].style.display = "none";
-	      	})
+   		this.loadData();
     },
   template: `<div class="container mt-5">
 		<div class="row">
@@ -232,12 +248,12 @@ const News = {
 				<transition-group name="list" tag="div">
 					<div v-for="item in randomNews" v-bind:key="item" class="row mb-3">
 						<div class="col-4">
-							<a href="">
+							<router-link :to="{ name: 'post', params: { post: item.link }}">
 								<img :src="item.image" width="100%">
-							</a>
+							</router-link>
 						</div>
 						<div class="col-8 content">
-							<a class="random-news-title" href="#">{{item.title}}</a>
+							<router-link :to="{ name: 'post', params: { post: item.link }}" class="random-news-title">{{item.title}}</router-link>
 							<p>By <strong>{{item.author}}</strong></p>
 						</div>
 					</div>
@@ -283,7 +299,7 @@ const Create = {
     },
     watch: {
     	urlInput: function() {
-    		this.dmInput['url'] = this.urlInput.split("/")[0] + "//" + this.urlInput.split("/")[2];   
+    		this.dmInput['url'] = this.urlInput.split("/")[0] + "//" + this.urlInput.split("/")[2];
     		this.dmmInput['url'] = this.urlInput;		    		
     	},
     	blockInput: function() {
@@ -294,7 +310,6 @@ const Create = {
     	},
     	desInput: function() {
     		this.dmInput['description'] = this.desInput;
-    		this.dmmInput['description'] = this.desInput;
     	},
     	titleInput: function() {
     		this.dmInput['title'] = this.titleInput;
@@ -302,6 +317,7 @@ const Create = {
     	},
     	contentInput: function() {
     		this.dmInput['content'] = this.contentInput;
+    		this.dmmInput['description'] = this.contentInput;
     	},
     	authorInput: function() {
     		this.dmInput['author'] = this.authorInput;
@@ -352,6 +368,40 @@ const Create = {
 	},
 	template: `
 	<div>
+		<div class="container" style="margin: 40px auto 60px">
+			<h2>List Links</h2>
+			<table class="table demo-table mt-4">
+			  <thead>
+			    <tr>
+			      <th scope="col">#</th>
+			      <th scope="col">First</th>
+			      <th scope="col">Last</th>
+			      <th scope="col">Handle</th>
+			    </tr>
+			  </thead>
+			  <tbody>
+			    <tr>
+			      <th scope="row">1</th>
+			      <td>Mark</td>
+			      <td>Otto</td>
+			      <td>@mdo</td>
+			    </tr>
+			    <tr>
+			      <th scope="row">2</th>
+			      <td>Jacob</td>
+			      <td>Thornton</td>
+			      <td>@fat</td>
+			    </tr>
+			    <tr>
+			      <th scope="row">3</th>
+			      <td>Larry</td>
+			      <td>the Bird</td>
+			      <td>@twitter</td>
+			    </tr>
+			  </tbody>
+			</table>
+		</div>
+		
 		<div class="news-form mt-5">
 			<h5 class="ml-1 mb-4">Feel free to contribute! Please be respectful.</h5>
 			<h3 class="ml-1">Add News Link</h3>
@@ -409,7 +459,7 @@ const Create = {
 		<transition name="fade" mode="out-in">
 			<div class="container" v-if="showDm">		
 				<div id="live-demo-area" class="live-demo-area mt-4">
-					<h3 class="mb-5">{{dmData.title}}</h3>
+					<h3 class="mb-5 text-center">{{dmData.title}}</h3>
 					<div class="live-demo-content" v-html="dmData.content"></div>
 				</div>
 				<div class="col-md-5" style="margin-left:25.6%;"><button v-on:click="submitDm" class="mt-4 live-demo">Save</button></div>
