@@ -183,6 +183,7 @@ const News = {
 			this.allNews = JSON.parse(localStorage.getItem("allNews"));
 			for(let i=0; i<this.allNews.length; i++) { this.iNews.push(i) }
 			this.irray = pickRandom(this.iNews, parseInt(this.icount));
+		
 			this.randomNews = [];
 			this.irray.forEach(e => {
 				this.randomNews.push(this.allNews[e])
@@ -285,6 +286,8 @@ const Create = {
 			authorInput: '',
 			linkInput: '',
 			bodyFormData: null,
+			listSelector: [],
+			onSave: false,
 			config: {
 				headers: {
 					'Content-Type': 'application/json',
@@ -345,6 +348,8 @@ const Create = {
     	},
     	submitDm: function() {
     		if (this.showDm==true) {
+    			this.onSave = true;
+    			
     			this.bodyFormData = new URLSearchParams();
 		  		this.bodyFormData.append('url', this.urlInput);
 				this.bodyFormData.append('block', this.blockInput);
@@ -357,47 +362,58 @@ const Create = {
     			axios
 				.post('https://1-dot-crawl-article96.appspot.com/admin/resource', this.bodyFormData, this.configSave)
 				.then(response => {
-					alert('GGWP!');
-				})
+					alert('Successfully!');
+				    location.reload();
+				}).catch(error => {
+				    console.log(error);
+				    this.onSave = false;
+				    alert('Fail cmnr.');
+				});
     		}
     	}
     },
 	mounted: function() {
-		document.getElementsByClassName("loader-wrap")[0].style.display = "none";
-  		document.getElementsByClassName("loader")[0].style.display = "none";	
+		axios
+	      .get('https://1-dot-crawl-article96.appspot.com/admin/resource')
+	      .then(response => {
+      			this.listSelector = response.data;      	
+	      	}).finally(function() {
+	      		document.getElementsByClassName("loader-wrap")[0].style.display = "none";
+	      		document.getElementsByClassName("loader")[0].style.display = "none";
+	      		document.body.scrollTop = 0;
+				document.documentElement.scrollTop = 0;
+	      	})	
 	},
 	template: `
 	<div>
 		<div class="container" style="margin: 40px auto 60px">
 			<h2>List Links</h2>
-			<table class="table demo-table mt-4">
+			<table class="table demo-table mt-3">
 			  <thead>
 			    <tr>
 			      <th scope="col">#</th>
-			      <th scope="col">First</th>
-			      <th scope="col">Last</th>
-			      <th scope="col">Handle</th>
+			      <th scope="col">Url</th>
+			      <th scope="col">Block</th>
+			      <th scope="col">Content</th>
+			      <th scope="col">Title</th>			      
+			      <th scope="col">Description</th>
+			      <th scope="col">Author</th>
+			      <th scope="col">Image</th>
+			      <th scope="col">Link</th>
 			    </tr>
 			  </thead>
 			  <tbody>
-			    <tr>
-			      <th scope="row">1</th>
-			      <td>Mark</td>
-			      <td>Otto</td>
-			      <td>@mdo</td>
-			    </tr>
-			    <tr>
-			      <th scope="row">2</th>
-			      <td>Jacob</td>
-			      <td>Thornton</td>
-			      <td>@fat</td>
-			    </tr>
-			    <tr>
-			      <th scope="row">3</th>
-			      <td>Larry</td>
-			      <td>the Bird</td>
-			      <td>@twitter</td>
-			    </tr>
+			    <tr v-for="(item, itemObjKey) in listSelector">
+			      <th scope="row">{{itemObjKey + 1}}</th>
+			      <td>{{item.url}}</td>
+			      <td>{{item.blockSource}}</td>
+			      <td>{{item.contentSelector}}</td>
+			      <td>{{item.titleSelector}}</td>
+			      <td>{{item.descriptionSelector}}</td>
+			      <td>{{item.authorSelector}}</td>
+			      <td>{{item.imageSelector}}</td>
+			      <td>{{item.linkSelector}}</td>
+			    </tr>			
 			  </tbody>
 			</table>
 		</div>
@@ -462,7 +478,8 @@ const Create = {
 					<h3 class="mb-5 text-center">{{dmData.title}}</h3>
 					<div class="live-demo-content" v-html="dmData.content"></div>
 				</div>
-				<div class="col-md-5" style="margin-left:25.6%;"><button v-on:click="submitDm" class="mt-4 live-demo">Save</button></div>
+				<div v-if="onSave==false" class="col-md-5" style="margin-left:25.6%;"><button v-on:click="submitDm" class="mt-4 live-demo">Save</button></div>
+				<div v-else class="col-md-5" style="margin-left:25.6%;"><button class="mt-4 live-demo">Loading...</button></div>
 			</div>
 		</transition>
 	</div>`

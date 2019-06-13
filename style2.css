@@ -50,7 +50,8 @@
 	overflow: hidden;
 }
 .demo-table {
-	box-shadow: 0 4px 10px rgb(68, 71, 76, 0.1);
-	border-radius: 5px;
+	box-shadow: 0 4px 10px rgb(68, 71, 76, 0.2);
+	border-bottom-right-radius: 5px;
+	border-bottom-left-radius: 5px;
 	border-top: none;
 }
